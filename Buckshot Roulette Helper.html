@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buckshot Roulette Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        input, button, select {
+            padding: 10px;
+            margin: 5px;
+            font-size: 16px;
+        }
+        .setup-section {
+            margin-bottom: 20px;
+        }
+        .stats-section {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        .buttons-section {
+            margin-top: 20px;
+        }
+        .button {
+            padding: 12px 20px;
+            font-size: 16px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            color: white;
+        }
+        .live-btn {
+            background-color: #d9534f;
+        }
+        .blank-btn {
+            background-color: #5bc0de;
+        }
+        .phone-btn {
+            background-color: #5cb85c;
+        }
+        .button:hover {
+            opacity: 0.8;
+        }
+        .hidden {
+            display: none;
+        }
+        .shell-tray {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 15px 0;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            min-height: 40px;
+        }
+        .shell {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .live-shell {
+            background-color: #d9534f;
+        }
+        .blank-shell {
+            background-color: #5bc0de;
+        }
+        .fired-live {
+            background-color: #a94442;
+        }
+        .fired-blank {
+            background-color: #31b0d5;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        .info-card {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .info-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 15px 0;
+            color: #856404;
+        }
+        .inverter-note {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 15px 0;
+            color: #0c5460;
+        }
+        .phone-section {
+            background-color: #e8f5e9;
+            border: 1px solid #c8e6c9;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .revealed-shells {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        .revealed-item {
+            margin: 5px 0;
+            padding: 5px;
+            background-color: #e3f2fd;
+            border-radius: 3px;
+        }
+        .decision {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin: 15px 0;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .likely-decision {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        .equal-decision {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .definite-decision {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .creator {
+            position: absolute;
+            bottom: 10px;
+            right: 20px;
+            font-size: 14px;
+            color: #6c757d;
+            font-style: italic;
+        }
+        .creator a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .creator a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Buckshot Roulette Calculator</h1>
+        
+        <div id="setupSection" class="setup-section">
+            <h2>Setup Game</h2>
+            <label>Total Rounds in Shotgun:</label><br>
+            <input type="number" id="totalRounds" min="1" value="8" onchange="updateLivesFromTotal()"><br><br>
+            
+            <label>Live Shells:</label><br>
+            <input type="number" id="liveShells" min="0" value="4" onchange="updateBlanksFromLives()"><br><br>
+            
+            <label>Blank Shells:</label><br>
+            <input type="number" id="blankShells" min="0" value="4" onchange="updateLivesFromBlanks()"><br><br>
+            
+            <button onclick="startGame()">Start Game</button>
+        </div>
+        
+        <div id="gameSection" class="hidden">
+            <h2>Game Stats</h2>
+            
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-title">Starting Configuration</div>
+                    <p>Total Shells: <span id="startTotal">8</span></p>
+                    <p>Live Shells: <span id="startLive">4</span></p>
+                    <p>Blank Shells: <span id="startBlank">4</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-title">Current Status</div>
+                    <p>Remaining Shells: <span id="totalRemaining">8</span></p>
+                    <p>Remaining Live: <span id="remainingLive">4</span></p>
+                    <p>Remaining Blank: <span id="remainingBlank">4</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-title">Fired Shells</div>
+                    <p>Live Fired: <span id="firedLive">0</span></p>
+                    <p>Blank Fired: <span id="firedBlank">0</span></p>
+                    <p>Total Fired: <span id="totalFired">0</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-title">Chances</div>
+                    <p>Next Live: <span id="chanceLive">50.00%</span></p>
+                    <p>Next Blank: <span id="chanceBlank">50.00%</span></p>
+                </div>
+                
+                <div class="info-card">
+                    <div class="info-title">Chamber Position</div>
+                    <p>Current Position: <span id="currentPosition">1</span></p>
+                    <p>Known Shells: <span id="knownCount">0</span></p>
+                </div>
+            </div>
+            
+            <div class="inverter-note">
+                <strong>Inverter Used?</strong> If an Inverter was used, click the opposite shell type that was actually fired. 
+                For example, if a Live shell was fired but an Inverter was used, click "Shot Was Blank" to correctly update the counts.
+            </div>
+            
+            <div class="phone-section">
+                <h3>Burner Phone</h3>
+                <p>Use the Burner Phone to reveal information about upcoming shells:</p>
+                <label for="phoneShotNum">Reveal Nth shot (1 = next, 2 = after next, etc.):</label>
+                <input type="number" id="phoneShotNum" min="1" value="2" style="width: 80px;">
+                
+                <label for="phoneShellType">Shell Type:</label>
+                <select id="phoneShellType">
+                    <option value="live">Live</option>
+                    <option value="blank">Blank</option>
+                </select>
+                
+                <button class="button phone-btn" onclick="usePhone()">Use Phone</button>
+                
+                <div id="revealedShellsSection" class="revealed-shells hidden">
+                    <h4>Revealed Shells</h4>
+                    <div id="revealedList"></div>
+                </div>
+            </div>
+            
+            <h3>Remaining Shells Visualization</h3>
+            <div class="shell-tray" id="shellTray">
+                <!-- Shell visualization will be generated here -->
+            </div>
+            
+            <div class="buttons-section">
+                <button class="button live-btn" onclick="shotResult('live')">Shot Was Live</button>
+                <button class="button blank-btn" onclick="shotResult('blank')">Shot Was Blank</button>
+                <button onclick="resetGame()">Reset Game</button>
+            </div>
+            
+            <div id="decisionSection" class="decision">
+                <!-- Decision will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="creator"><a href="https://linktr.ee/cringe2137" target="_blank">by Cringe2137</a></div>
+    </div>
+
+    <script>
+        let totalRounds = 0;
+        let liveShells = 0;
+        let blankShells = 0;
+        let startingLive = 0;
+        let startingBlank = 0;
+        let firedLive = 0;
+        let firedBlank = 0;
+        let currentShotPosition = 1;
+        let knownShells = {};
+
+        function updateLivesFromTotal() {
+            const total = parseInt(document.getElementById('totalRounds').value) || 0;
+            const blanks = parseInt(document.getElementById('blankShells').value) || 0;
+            
+            if (blanks <= total) {
+                document.getElementById('liveShells').value = total - blanks;
+            } else {
+                document.getElementById('blankShells').value = total;
+                document.getElementById('liveShells').value = 0;
+            }
+        }
+
+        function updateBlanksFromLives() {
+            const total = parseInt(document.getElementById('totalRounds').value) || 0;
+            const lives = parseInt(document.getElementById('liveShells').value) || 0;
+            
+            if (lives <= total) {
+                document.getElementById('blankShells').value = total - lives;
+            } else {
+                document.getElementById('liveShells').value = total;
+                document.getElementById('blankShells').value = 0;
+            }
+        }
+
+        function updateLivesFromBlanks() {
+            const total = parseInt(document.getElementById('totalRounds').value) || 0;
+            const blanks = parseInt(document.getElementById('blankShells').value) || 0;
+            
+            if (blanks <= total) {
+                document.getElementById('liveShells').value = total - blanks;
+            } else {
+                document.getElementById('blankShells').value = total;
+                document.getElementById('liveShells').value = 0;
+            }
+        }
+
+        function startGame() {
+            const totalInput = parseInt(document.getElementById('totalRounds').value);
+            const liveInput = parseInt(document.getElementById('liveShells').value);
+            const blankInput = parseInt(document.getElementById('blankShells').value);
+
+            if (isNaN(totalInput) || isNaN(liveInput) || isNaN(blankInput)) {
+                alert("Please enter valid numbers for all fields.");
+                return;
+            }
+
+            if (totalInput !== liveInput + blankInput) {
+                alert("Total rounds must equal the sum of live and blank shells.");
+                return;
+            }
+
+            if (liveInput < 0 || blankInput < 0) {
+                alert("Number of live and blank shells cannot be negative.");
+                return;
+            }
+
+            totalRounds = totalInput;
+            liveShells = liveInput;
+            blankShells = blankInput;
+            startingLive = liveInput;
+            startingBlank = blankInput;
+            firedLive = 0;
+            firedBlank = 0;
+            currentShotPosition = 1;
+            knownShells = {};
+
+            updateDisplay();
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('gameSection').classList.remove('hidden');
+        }
+
+        function usePhone() {
+            const nthShot = parseInt(document.getElementById('phoneShotNum').value);
+            const shellType = document.getElementById('phoneShellType').value;
+            
+            if (isNaN(nthShot) || nthShot < 1) {
+                alert("Please enter a valid shot number (1 or greater).");
+                return;
+            }
+            
+            const absolutePosition = currentShotPosition + (nthShot - 1);
+            knownShells[absolutePosition] = shellType;
+            
+            updateDisplay();
+            renderRevealedShells();
+        }
+
+        function renderRevealedShells() {
+            const container = document.getElementById('revealedList');
+            container.innerHTML = '';
+            
+            const positions = Object.keys(knownShells).sort((a, b) => a - b);
+            
+            if (positions.length === 0) {
+                document.getElementById('revealedShellsSection').classList.add('hidden');
+                return;
+            }
+            
+            document.getElementById('revealedShellsSection').classList.remove('hidden');
+            
+            for (const pos of positions) {
+                const type = knownShells[pos];
+                const div = document.createElement('div');
+                div.className = 'revealed-item';
+                div.textContent = `Position ${pos}: ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+                container.appendChild(div);
+            }
+        }
+
+        function shotResult(result) {
+            if (result === 'live' && liveShells > 0) {
+                liveShells--;
+                firedLive++;
+            } else if (result === 'blank' && blankShells > 0) {
+                blankShells--;
+                firedBlank++;
+            } else {
+                alert("Invalid action - no more shells of that type!");
+                return;
+            }
+
+            // Move to next position
+            currentShotPosition++;
+
+            // Check if game is over
+            if (liveShells === 0 && blankShells === 0) {
+                resetGame();
+                return;
+            }
+
+            updateDisplay();
+        }
+
+        function calculateOdds() {
+            // Check if the current position has a known shell
+            if (knownShells[currentShotPosition]) {
+                const knownType = knownShells[currentShotPosition];
+                if (knownType === 'live') {
+                    return { live: 100, blank: 0 };
+                } else {
+                    return { live: 0, blank: 100 };
+                }
+            }
+
+            // Count known future shells
+            let knownFutureLives = 0;
+            let knownFutureBlanks = 0;
+            
+            for (const pos in knownShells) {
+                if (parseInt(pos) > currentShotPosition) {
+                    if (knownShells[pos] === 'live') {
+                        knownFutureLives++;
+                    } else {
+                        knownFutureBlanks++;
+                    }
+                }
+            }
+
+            // Calculate unknown shells
+            const unknownLives = liveShells - knownFutureLives;
+            const unknownBlanks = blankShells - knownFutureBlanks;
+            
+            if (unknownLives + unknownBlanks === 0) {
+                return { live: 0, blank: 0 };
+            }
+            
+            const totalUnknown = unknownLives + unknownBlanks;
+            const livePercent = (unknownLives / totalUnknown) * 100;
+            const blankPercent = (unknownBlanks / totalUnknown) * 100;
+            
+            return { live: livePercent, blank: blankPercent };
+        }
+
+        function getDecision() {
+            const odds = calculateOdds();
+            
+            if (odds.live === 100) {
+                return {
+                    text: "It's definitely live",
+                    className: "definite-decision"
+                };
+            } else if (odds.blank === 100) {
+                return {
+                    text: "It's definitely blank",
+                    className: "definite-decision"
+                };
+            } else if (Math.abs(odds.live - odds.blank) < 0.01) {
+                return {
+                    text: "The chances are equal",
+                    className: "equal-decision"
+                };
+            } else if (odds.live > odds.blank) {
+                return {
+                    text: `It's probably live (${odds.live.toFixed(2)}%)`,
+                    className: "likely-decision"
+                };
+            } else {
+                return {
+                    text: `It's probably blank (${odds.blank.toFixed(2)}%)`,
+                    className: "likely-decision"
+                };
+            }
+        }
+
+        function updateDisplay() {
+            // Update stats
+            document.getElementById('startTotal').textContent = totalRounds;
+            document.getElementById('startLive').textContent = startingLive;
+            document.getElementById('startBlank').textContent = startingBlank;
+            document.getElementById('remainingLive').textContent = liveShells;
+            document.getElementById('remainingBlank').textContent = blankShells;
+            document.getElementById('totalRemaining').textContent = liveShells + blankShells;
+            document.getElementById('firedLive').textContent = firedLive;
+            document.getElementById('firedBlank').textContent = firedBlank;
+            document.getElementById('totalFired').textContent = firedLive + firedBlank;
+            document.getElementById('currentPosition').textContent = currentShotPosition;
+            document.getElementById('knownCount').textContent = Object.keys(knownShells).length;
+
+            // Calculate and update chances
+            const odds = calculateOdds();
+            document.getElementById('chanceLive').textContent = `${odds.live.toFixed(2)}%`;
+            document.getElementById('chanceBlank').textContent = `${odds.blank.toFixed(2)}%`;
+
+            // Update decision
+            const decision = getDecision();
+            const decisionElement = document.getElementById('decisionSection');
+            decisionElement.textContent = decision.text;
+            decisionElement.className = `decision ${decision.className}`;
+
+            // Update shell visualization
+            updateShellTray();
+        }
+
+        function updateShellTray() {
+            const trayElement = document.getElementById('shellTray');
+            trayElement.innerHTML = '';
+
+            // Create visual representation of remaining live shells
+            for (let i = 0; i < liveShells; i++) {
+                const shell = document.createElement('div');
+                shell.className = 'shell live-shell';
+                shell.title = 'Live Shell';
+                trayElement.appendChild(shell);
+            }
+
+            // Create visual representation of remaining blank shells
+            for (let i = 0; i < blankShells; i++) {
+                const shell = document.createElement('div');
+                shell.className = 'shell blank-shell';
+                shell.title = 'Blank Shell';
+                trayElement.appendChild(shell);
+            }
+        }
+
+        function resetGame() {
+            document.getElementById('setupSection').classList.remove('hidden');
+            document.getElementById('gameSection').classList.add('hidden');
+            
+            // Reset inputs to defaults
+            document.getElementById('totalRounds').value = 8;
+            document.getElementById('liveShells').value = 4;
+            document.getElementById('blankShells').value = 4;
+            
+            // Reset game state
+            currentShotPosition = 1;
+            knownShells = {};
+            
+            // Clear revealed shells section
+            document.getElementById('revealedList').innerHTML = '';
+            document.getElementById('revealedShellsSection').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
