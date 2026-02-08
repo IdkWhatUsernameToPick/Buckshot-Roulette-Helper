@@ -186,13 +186,13 @@
         <div id="setupSection" class="setup-section">
             <h2>Setup Game</h2>
             <label>Total Rounds in Shotgun:</label><br>
-            <input type="number" id="totalRounds" min="1" value="8" onchange="updateLivesFromTotal()"><br><br>
+            <input type="number" id="totalRounds" min="1" value="8"><br><br>
             
             <label>Live Shells:</label><br>
-            <input type="number" id="liveShells" min="0" value="4" onchange="updateBlanksFromLives()"><br><br>
+            <input type="number" id="liveShells" min="0" value="4" onchange="updateTotalFromLives()"><br><br>
             
             <label>Blank Shells:</label><br>
-            <input type="number" id="blankShells" min="0" value="4" onchange="updateLivesFromBlanks()"><br><br>
+            <input type="number" id="blankShells" min="0" value="4" onchange="updateTotalFromBlanks()"><br><br>
             
             <button onclick="startGame()">Start Game</button>
         </div>
@@ -290,40 +290,16 @@
         let currentShotPosition = 1;
         let knownShells = {};
 
-        function updateLivesFromTotal() {
-            const total = parseInt(document.getElementById('totalRounds').value) || 0;
-            const blanks = parseInt(document.getElementById('blankShells').value) || 0;
-            
-            if (blanks <= total) {
-                document.getElementById('liveShells').value = total - blanks;
-            } else {
-                document.getElementById('blankShells').value = total;
-                document.getElementById('liveShells').value = 0;
-            }
-        }
-
-        function updateBlanksFromLives() {
-            const total = parseInt(document.getElementById('totalRounds').value) || 0;
+        function updateTotalFromLives() {
             const lives = parseInt(document.getElementById('liveShells').value) || 0;
-            
-            if (lives <= total) {
-                document.getElementById('blankShells').value = total - lives;
-            } else {
-                document.getElementById('liveShells').value = total;
-                document.getElementById('blankShells').value = 0;
-            }
+            const blanks = parseInt(document.getElementById('blankShells').value) || 0;
+            document.getElementById('totalRounds').value = lives + blanks;
         }
 
-        function updateLivesFromBlanks() {
-            const total = parseInt(document.getElementById('totalRounds').value) || 0;
+        function updateTotalFromBlanks() {
+            const lives = parseInt(document.getElementById('liveShells').value) || 0;
             const blanks = parseInt(document.getElementById('blankShells').value) || 0;
-            
-            if (blanks <= total) {
-                document.getElementById('liveShells').value = total - blanks;
-            } else {
-                document.getElementById('blankShells').value = total;
-                document.getElementById('liveShells').value = 0;
-            }
+            document.getElementById('totalRounds').value = lives + blanks;
         }
 
         function startGame() {
